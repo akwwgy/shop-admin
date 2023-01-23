@@ -80,7 +80,25 @@ const changeTab = (t) => {
   activeTab.value = t
 }
 
-const removeTab = (targetName) => {
+const removeTab = (t) => {
+  console.log(t);
+  let tabs = tabList.value;
+  let a = activeTab.value;
+  if (a == t) {
+    tabs.forEach((tab, index) => {
+      if (tab.path == t) {
+        const nextTab = tabs[index + 1] || tabs[index - 1];
+        if (nextTab) {
+          a = nextTab.path;
+        }
+      }
+    })
+  }
+  //因为UI组件默认有change事件，所以这个改变了就会触发那个事件
+  activeTab.value = a;
+  //数组过滤函数，只有不等于当前关闭这个才能被留下来
+  tabList.value = tabList.value.filter(tab => tab.path != t);
+  cookie.set("tabList", tabList.value);
 }
 
 </script>
