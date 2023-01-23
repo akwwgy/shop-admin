@@ -1,6 +1,7 @@
 <template>
   <div class="f-tag-list" :style="{ left: $store.state.asideWidth }">
-    <el-tabs v-model="activeTab" type="card" class="flex-1" @tab-remove="removeTab" style="overflow:auto">
+    <el-tabs v-model="activeTab" type="card" class="flex-1" @tab-remove="removeTab" style="overflow:auto"
+      @tab-change="changeTab">
       <el-tab-pane v-for="item in tabList" :key="item.path" :closable="item.path != '/'" :label="item.title"
         :name="item.path">
       </el-tab-pane>
@@ -24,12 +25,15 @@
       </el-dropdown>
     </span>
   </div>
+  <!-- 定义一个占位符占住，不然下面的内容显示不出来 因为fiexed不占位，下面的会被盖住 -->
+  <div style="height:40px"></div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { useCookies } from '@vueuse/integrations/useCookies'
+import { router } from '../../router';
 
 const route = useRoute();
 const cookie = useCookies();
@@ -47,6 +51,14 @@ const tabList = ref([
   },
 ])
 
+//初始化标签导航列表
+const initTabList = () => {
+  let tab = cookie.get("tabList");
+  if (tab) {
+    tabList.value = tab;
+  }
+}
+initTabList()
 //添加标签导航
 function addTab(tab) {
   //如果findIndex等于-1 就相当于没有找到
@@ -57,14 +69,20 @@ function addTab(tab) {
   cookie.set("tabList", tabList.value)
 }
 
+//
 onBeforeRouteUpdate((to, from) => {
   //如何添加之后，处于激活状态呢？
   activeTab.value = to.path
   addTab({ title: to.meta.title, path: to.path })
 })
+const changeTab = (t) => {
+  router.push(t)
+  activeTab.value = t
+}
 
 const removeTab = (targetName) => {
 }
+
 </script>
 
 <style scoped>
@@ -83,6 +101,7 @@ const removeTab = (targetName) => {
 }
 
 :deep(.el-tabs__header) {
+  border: 0 !important;
   @apply mb-0;
 }
 
