@@ -7,7 +7,7 @@
       </el-tab-pane>
     </el-tabs>
     <span class="tag-btn">
-      <el-dropdown>
+      <el-dropdown @command="handleClose">
         <span class="el-dropdown-link">
           <el-icon>
             <arrow-down />
@@ -15,11 +15,8 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>Action 1</el-dropdown-item>
-            <el-dropdown-item>Action 2</el-dropdown-item>
-            <el-dropdown-item>Action 3</el-dropdown-item>
-            <el-dropdown-item disabled>Action 4</el-dropdown-item>
-            <el-dropdown-item divided>Action 5</el-dropdown-item>
+            <el-dropdown-item command="clearAll">全部关闭</el-dropdown-item>
+            <el-dropdown-item command="clearOther">关闭其他</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -100,7 +97,19 @@ const removeTab = (t) => {
   tabList.value = tabList.value.filter(tab => tab.path != t);
   cookie.set("tabList", tabList.value);
 }
-
+const handleClose = (c) => {
+  switch (c) {
+    case "clearAll":
+      activeTab.value = '/';
+      tabList.value = [{ title: '后台首页', path: '/' }]
+      break;
+    case "clearOther":
+      //过滤只剩下首页和当前页
+      tabList.value = tabList.value.filter(tab => tab.path == '/' || tab.path == activeTab.value)
+      break;
+  }
+  cookie.set("tabList", tabList.value)
+}
 </script>
 
 <style scoped>
