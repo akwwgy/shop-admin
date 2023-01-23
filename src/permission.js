@@ -4,6 +4,9 @@ import { getToken } from '@/composables/auth'
 import { toast, showFullLoading, hideFullLoading } from '@/composables/util'
 import store from './store';
 
+
+let hasGetInfo = false;
+
 //全局前置守卫
 router.beforeEach(async (to, from, next) => {
 
@@ -24,9 +27,12 @@ router.beforeEach(async (to, from, next) => {
 
   }
   let hasNewRoutes = false;
-  if (token) {
+  if (token && !hasGetInfo) {
     //在这调用了actions中的getinfo
     let { menus } = await store.dispatch("getinfo");
+
+    //加载完之后，就让hasGetInfo变回去   速度原因就是因为每次点击都发了两次geiinfo请求
+    hasGetInfo = true;
 
     //在这里动态添加路由
     hasNewRoutes = addRoutes(menus)
