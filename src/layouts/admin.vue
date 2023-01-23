@@ -10,10 +10,13 @@
       <el-main>
         <thetaglist />
         <router-view v-slot="{ Component }">
-          <keep-alive :max="10">
-            <component :is="Component">
-            </component>
-          </keep-alive>
+          <!-- transition使用的时候每一个vue文件只能有一个根节点 -->
+          <transition name="fade">
+            <keep-alive :max="10">
+              <component :is="Component">
+              </component>
+            </keep-alive>
+          </transition>
         </router-view>
       </el-main>
     </el-container>
@@ -29,5 +32,26 @@ import Thetaglist from '@/layouts/components/FTagList.vue'
 <style scoped>
 .el-aside {
   transition: all 0.2s;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+
+.fade-enter-to {
+  opacity: 1;
+}
+
+.fade-leave-from {
+  opacity: 1;
+}
+
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all .3s;
 }
 </style>
