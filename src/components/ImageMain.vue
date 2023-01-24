@@ -6,6 +6,7 @@
         <el-col :span="6" :offset="0" v-for="(item, index) in list" :key="index">
           <el-card shadow="hover" class="relative mb-3" :body-style="{ 'padding': 0 }"
             :class="{ 'border-blue-500': item.checked }">
+            <!-- :preview-src-list="[item.url]"点击预览效果 -->
             <el-image :src="item.url" fit="cover" class="h-[150px]" style="width: 100%;" :preview-src-list="[item.url]"
               :initial-index="0"></el-image>
             <div class="image-title">{{ item.name }}</div>
@@ -36,8 +37,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { getImageList } from '@/api/image.js'
+import { ref, computed } from "vue"
+import {
+  getImageList,
+  updateImage,
+  deleteImage
+} from "@/api/image.js"
+import {
+  showPrompt,
+  toast
+} from "@/composables/util.js"
 
 const currentPage = ref(1);
 const total = ref(0)
@@ -68,6 +77,32 @@ const loadData = (id) => {
   currentPage.value = 1;
   image_class_id.value = id;
   getData();
+}
+
+//重命名
+const handleEdit = (item) => {
+  //对value进行解构
+  showPrompt("重命名", item.name).then(({ value }) => {
+    loading.value = true;
+    updateImage(item.id, value).then(res => {
+      toast("修改成功");
+      getData()
+    }).finally(() => {
+      loading.value = false;
+    })
+  })
+}
+
+// 删除图片
+const handleDelete = (id) => {
+  loading.value = true
+  deleteImage([id]).then(res => {
+    toast("删除成功")
+    getData()
+  })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 defineExpose({
