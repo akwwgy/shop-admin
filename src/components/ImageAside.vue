@@ -27,9 +27,9 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import FormDrawer from '@/components/FormDrawer.vue'
-import { getImageClassList } from '@/api/image_class.js'
+import { getImageClassList, createImageClassList } from '@/api/image_class.js'
 import AsideList from '@/components/AsideList.vue'
-
+import { toast } from '@/composables/util.js'
 //分页部分
 const currentPage = ref(1);
 const total = ref(0)
@@ -97,7 +97,15 @@ const formRef = ref(null)
 const handleSubmit = () => {
   formRef.value.validate((vaild) => {
     if (!vaild) return;
-    console.log("提交成功");
+    // console.log("提交成功");
+    formDrawerRef.value.showLoading();
+    createImageClassList(form).then(res => {
+      toast("新增成功");
+      getData(1)
+      formDrawerRef.value.close();
+    }).finally(() => {
+      formDrawerRef.value.hideLoading();
+    })
   })
 }
 
