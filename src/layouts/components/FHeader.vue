@@ -116,6 +116,7 @@ const handleCommand = (c) => {
 .f-header {
   height: 64px;
   @apply flex items-center bg-indigo-700 text-light-50 fixed top-0 left-0 right-0;
+  z-index: 1000;
 }
 
 .logo {
