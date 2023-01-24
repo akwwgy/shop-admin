@@ -17,8 +17,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts';
+import { getStatistics3 } from '@/api/index.js'
 const current = ref("week")
 const options = [{
   text: "近一个月",
@@ -33,25 +34,30 @@ const options = [{
 }]
 
 const handleChoose = (type) => {
-
+  current.value = type;
+  getData()
 }
-var myChart = null;
+
 //渲染完再调用echart组件
 onMounted(() => {
   var chartDom = document.getElementById('chart');
   myChart = echarts.init(chartDom)
-  var option;
-  option = {
+  getData();
+})
+
+var myChart = null;
+function getData() {
+  let option = {
     xAxis: {
       type: 'category',
-      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      data: []
     },
     yAxis: {
       type: 'value'
     },
     series: [
       {
-        data: [120, 200, 150, 80, 70, 110, 130],
+        data: [],
         type: 'bar',
         showBackground: true,
         backgroundStyle: {
@@ -60,8 +66,26 @@ onMounted(() => {
       }
     ]
   }
-  option && myChart.setOption(option);
-})
+  //定义加载loading状态
+  myChart.showLoading()
+  // option && myChart.setOption(option);
+  getStatistics3(current.value).then(res => {
+    console.log(res);
+    option.xAxis.data = res.x
+    option.series[0].data = res.y
+    myChart.setOption(option)
+    console.log(current.value);
+  }).finally(() => {
+    myChart.hideLoading()
+  })
+
+
+  //一个小bug
+  //如果离开这个页面不销毁echart 就会出现白屏现象
+  onBeforeUnmount(() => {
+    if (myChart) echarts.dispose(myChart);
+  })
+}
 </script>
 
 <style scoped>
