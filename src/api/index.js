@@ -6,3 +6,4 @@ export function getStatistics1() {
 export function getStatistics3(type) {
   return axios.get('/admin/statistics3?typer' + type);
 }
+
