@@ -11,6 +11,8 @@ const store = createStore({
       asideWidth: "250px",
 
       menus: [],
+
+      //权限控制
       ruleNames: []
     }
   },

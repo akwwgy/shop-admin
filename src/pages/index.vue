@@ -49,7 +49,8 @@
     <IndexNavs />
     <el-row :gutter="20" class="mt-5">
       <el-col :span="12" :offset="0">
-        <IndexChart />
+        <!-- 只有这个数组里面存储的别名和rulleNames里面有相同的，这个组件就留下 -->
+        <IndexChart v-permission="['getStatistics3,GET']" />
       </el-col>
       <el-col :span="12" :offset="0">
         <IndexCard title="店铺及商品提示" tip="店铺及商品提示" :btns="goods" class="mb-3" />
