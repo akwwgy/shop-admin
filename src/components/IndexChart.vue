@@ -12,7 +12,7 @@
       </div>
     </template>
     <!-- card-body -->
-    <div id="chart" style="width:100%;height:300px"></div>
+    <div ref="el" id="chart" style="width:100%;height:300px"></div>
   </el-card>
 </template>
 
@@ -20,6 +20,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts';
 import { getStatistics3 } from '@/api/index.js'
+import { useResizeObserver } from '@vueuse/core'
 const current = ref("week")
 const options = [{
   text: "近一个月",
@@ -70,22 +71,27 @@ function getData() {
   myChart.showLoading()
   // option && myChart.setOption(option);
   getStatistics3(current.value).then(res => {
-    console.log(res);
+    // console.log(res);
     option.xAxis.data = res.x
     option.series[0].data = res.y
     myChart.setOption(option)
-    console.log(current.value);
+    // console.log(current.value);
   }).finally(() => {
     myChart.hideLoading()
   })
-
-
-  //一个小bug
-  //如果离开这个页面不销毁echart 就会出现白屏现象
-  onBeforeUnmount(() => {
-    if (myChart) echarts.dispose(myChart);
-  })
 }
+
+const el = ref(null);
+useResizeObserver(el, (entries) => {
+  console.log(el.value);
+  myChart.resize()
+})
+
+//一个小bug
+//如果离开这个页面不销毁echart 就会出现白屏现象
+onBeforeUnmount(() => {
+  if (myChart) echarts.dispose(myChart);
+})
 </script>
 
 <style scoped>
