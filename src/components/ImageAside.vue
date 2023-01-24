@@ -1,7 +1,8 @@
 <template>
   <el-aside width="220px" class="image-aside" loading>
     <div class="top">
-      <AsideList :active="activeId == item.id" v-for="(item, index) in list" :key="index">
+      <AsideList :active="activeId == item.id" v-for="(item, index) in list" :key="index" @edit="handleEdit(item)"
+        @delete="handleDelete(item.id)">
         {{ item.name }}
       </AsideList>
     </div>
@@ -10,7 +11,7 @@
         @current-change="getData" />
     </div>
   </el-aside>
-  <FormDrawer title="新增" ref="formDrawerRef" @submit="handleSubmit">
+  <FormDrawer :title="drawerTitle" ref="formDrawerRef" @submit="handleSubmit">
     <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false" size="normal">
       <el-form-item label="分类名称" prop="name">
         <el-input v-model="form.name"></el-input>
@@ -25,9 +26,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import FormDrawer from '@/components/FormDrawer.vue'
-import { getImageClassList, createImageClassList } from '@/api/image_class.js'
+import { getImageClassList, createImageClassList, updateImageClassList, deleteImageClassList } from '@/api/image_class.js'
 import AsideList from '@/components/AsideList.vue'
 import { toast } from '@/composables/util.js'
 //分页部分
@@ -66,13 +67,9 @@ function getData(p = null) {
 getData()
 
 
-
+const editId = ref(0)
+const drawerTitle = computed(() => editId.value ? "修改" : "新增")
 const formDrawerRef = ref(null);
-
-//打开表单抽屉的方法
-const handleCreate = () => {
-  formDrawerRef.value.open();
-}
 
 
 const form = reactive({
@@ -99,8 +96,10 @@ const handleSubmit = () => {
     if (!vaild) return;
     // console.log("提交成功");
     formDrawerRef.value.showLoading();
-    createImageClassList(form).then(res => {
-      toast("新增成功");
+    const fun = editId.value ? updateImageClassList(editId.value, form) : createImageClassList(form)
+
+    fun.then(res => {
+      toast(drawerTitle.value + "成功");
       getData(1)
       formDrawerRef.value.close();
     }).finally(() => {
@@ -109,6 +108,34 @@ const handleSubmit = () => {
   })
 }
 
+//新增
+//打开表单抽屉的方法
+const handleCreate = () => {
+  editId.value = 0;
+  form.name = ""
+  form.order = 50
+  formDrawerRef.value.open();
+}
+
+
+//编辑
+const handleEdit = (row) => {
+  editId.value = row.id;
+  form.name = row.name;
+  form.order = row.order;
+  formDrawerRef.value.open();
+}
+
+//删除
+const handleDelete = (id) => {
+  loading.value = true;
+  deleteImageClassList(id).then(res => {
+    toast("删除成功");
+    getData(1)
+  }).finally(() => {
+    loading.value = false
+  })
+}
 
 defineExpose({
   handleCreate
