@@ -2,7 +2,7 @@
   <el-aside width="220px" class="image-aside" loading>
     <div class="top">
       <AsideList :active="activeId == item.id" v-for="(item, index) in list" :key="index" @edit="handleEdit(item)"
-        @delete="handleDelete(item.id)">
+        @delete="handleDelete(item.id)" @click="handleChangeActiveId(item.id)">
         {{ item.name }}
       </AsideList>
     </div>
@@ -44,7 +44,7 @@ const loading = ref(false)
 
 //把网络请求数据保存起来，默认是空数组
 const list = ref([])
-const activeId = ref(0)
+
 //获取数据
 function getData(p = null) {
   if (typeof p == "number") {
@@ -58,7 +58,9 @@ function getData(p = null) {
 
     let item = list.value[0]
     if (item) {
-      activeId.value = item.id
+      // activeId.value = item.id
+      // 这么写才能获取分类之后，自动获取图库，去调用父组件，父组件去调用main中的方法
+      handleChangeActiveId(item.id)
     }
   }).finally(() => {
     loading.value = false
@@ -135,6 +137,15 @@ const handleDelete = (id) => {
   }).finally(() => {
     loading.value = false
   })
+}
+//选中图库分类ID
+const activeId = ref(0)
+const emit = defineEmits(["change"])
+
+//切换分类
+function handleChangeActiveId(id) {
+  activeId.value = id;
+  emit("change", id)
 }
 
 defineExpose({
