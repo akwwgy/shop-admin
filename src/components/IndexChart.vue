@@ -42,8 +42,17 @@ const handleChoose = (type) => {
 //渲染完再调用echart组件
 onMounted(() => {
   var chartDom = document.getElementById('chart');
-  myChart = echarts.init(chartDom)
+  //解决渲染 延迟bug
+  if (chartDom) {
+    myChart = echarts.init(chartDom);
+    getData()
+  }
   getData();
+})
+//一个小bug
+//如果离开这个页面不销毁echart 就会出现白屏现象
+onBeforeUnmount(() => {
+  if (myChart) echarts.dispose(myChart);
 })
 
 var myChart = null;
@@ -83,15 +92,11 @@ function getData() {
 
 const el = ref(null);
 useResizeObserver(el, (entries) => {
-  console.log(el.value);
+  // console.log(el.value);
   myChart.resize()
 })
 
-//一个小bug
-//如果离开这个页面不销毁echart 就会出现白屏现象
-onBeforeUnmount(() => {
-  if (myChart) echarts.dispose(myChart);
-})
+
 </script>
 
 <style scoped>
