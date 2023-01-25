@@ -87,6 +87,14 @@ const asyncRoutes = [
       title: "图库列表"
     }
   },
+  {
+    path: '/notice/list',
+    name: "/notice/list",
+    component: () => import("@/pages/notice/list.vue"),
+    meta: {
+      title: "公告管理"
+    }
+  },
 ]
 
 export const router = createRouter({
@@ -101,6 +109,7 @@ export function addRoutes(menus) {
   let hasNewRoutes = false;
   const findAddRoutesByMenus = (arr) => {
     arr.forEach(e => {
+      //判断是否有这个路由
       let item = asyncRoutes.find(o => o.path == e.frontpath)
       if (item && !router.hasRoute(item.path)) {
         router.addRoute("admin", item)
