@@ -52,24 +52,30 @@
       </el-table-column>
       <el-table-column label="状态" width="120">
         <template #default="{ row }">
-          <el-switch :module="row.status" :active-value="1" :inactive-value="0">
+          <!-- <el-switch :modelValue="row.status" :active-value="1" :inactive-value="0" :disabled="row.super == 1"
+            :loading="row.statusLoading" @change="handleStatusChange($event, row)">
+          </el-switch> -->
+          <el-switch :modelValue="row.status" :active-value="1" :inactive-value="0" :loading="row.statusLoading"
+            :disabled="row.super == 1" @change="handleStatusChange($event, row)">
           </el-switch>
-
         </template>
       </el-table-column>
       <el-table-column prop="create_time" label="发布时间" width="380"></el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
-          <el-button type="primary" size="small" text @click="handleEdit(scope.row)">修改</el-button>
-          <span @click.stop="() => { }">
-            <el-popconfirm title="是否要删除该管理员？" confirmButtonText="确认" cancelButtonText="取消" @confirm="handleDelete">
-              <template #reference>
-                <el-button text class="px-1" type="primary" size="small" @click="handleDelete(scope.row.id)">
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
-          </span>
+          <small v-if="scope.row.super == 1" class="text-sm text-gary-500">暂无操作</small>
+          <div v-else>
+            <el-button type="primary" size="small" text @click="handleEdit(scope.row)">修改</el-button>
+            <span @click.stop="() => { }">
+              <el-popconfirm title="是否要删除该管理员？" confirmButtonText="确认" cancelButtonText="取消" @confirm="handleDelete">
+                <template #reference>
+                  <el-button text class="px-1" type="primary" size="small" @click="handleDelete(scope.row.id)">
+                    删除
+                  </el-button>
+                </template>
+              </el-popconfirm>
+            </span>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -95,7 +101,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { getNoticeList, createNotice, updateNotice, deleteNotice } from '@/api/notice.js'
-import { getManagerList } from '@/api/manager.js'
+import { getManagerList, updateManagerStatus } from '@/api/manager.js'
 import FromDrawer from '@/components/FormDrawer.vue'
 import { toast } from '@/composables/util.js'
 
@@ -126,7 +132,11 @@ function getData(p = null) {
   //searchForm本来就是reactive类型的,正好需要传对象类型的,所以我们直接传searchForm即可
   getManagerList(currentPage.value, searchForm).then(res => {
     console.log(res);
-    tableData.value = res.list
+    tableData.value = res.list.map(o => {
+      //利用map添加属性
+      o.statusLoading = false;
+      return o
+    })
     total.value = res.totalCount
   }).finally(() => {
     loading.value = false
@@ -214,6 +224,17 @@ const handleCreate = () => {
     content: ""
   });
   formDrawerRef.value.open();
+}
+
+//修改状态
+const handleStatusChange = (status, row) => {
+  row.statusLoading = true;
+  updateManagerStatus(row.id, status).then(res => {
+    toast("修改状态成功")
+    row.status = status;
+  }).finally(() => {
+    row.statusLoading = false;
+  })
 }
 </script>
 

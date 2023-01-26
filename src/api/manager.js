@@ -31,3 +31,7 @@ export function getManagerList(page, query = {}) {
 
   return axios.get(`/admin/manager/${page}${r} `)
 }
+
+export function updateManagerStatus(id, status) {
+  return axios.post(`/admin/manager/${id}/update_status`, { status })
+}
