@@ -85,7 +85,7 @@
       <el-pagination background layout="prev, pager,next" :total="total" :current-page="currentPage" :page-size="limit"
         @current-change="getData" />
     </div>
-    <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
+    <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSumbit">
       <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="用户名"></el-input>
@@ -112,41 +112,33 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref } from 'vue'
 import { getManagerList, updateManagerStatus, createManager, updateManager, deleteManager } from '@/api/manager.js'
 import FormDrawer from '@/components/FormDrawer.vue'
 import ChooseImage from '@/components/ChooseImage.vue'
-import { toast } from '@/composables/util.js'
 
-const searchForm = reactive({
-  keyword: ""
-})
-
-const resetSearchFrom = () => {
-  searchForm.keyword = "";
-  getData();
-}
+import { useInitTable, useInitForm } from '@/composables/useCommon.js'
 
 const roles = ref([])
 
-const tableData = ref([])
-
-const loading = ref(false);
-
-const currentPage = ref(1)
-const total = ref(0)
-const limit = ref(10);
-
-
-//获取数据
-function getData(p = null) {
-  if (typeof p == "number") {
-    currentPage.value = p
-  }
-  loading.value = true;
-  //searchForm本来就是reactive类型的,正好需要传对象类型的,所以我们直接传searchForm即可
-  getManagerList(currentPage.value, searchForm).then(res => {
-    console.log(res);
+const {
+  searchForm,
+  resetSearchFrom,
+  tableData,
+  loading,
+  currentPage,
+  total,
+  limit,
+  handleDelete,
+  handleStatusChange,
+  getData
+} = useInitTable({
+  searchForm: {
+    keyword: ""
+  },
+  getList: getManagerList,
+  onGetListSuccess: (res) => {
+    // console.log(res);
     tableData.value = res.list.map(o => {
       //利用map添加属性
       o.statusLoading = false;
@@ -154,100 +146,37 @@ function getData(p = null) {
     })
     total.value = res.totalCount
     roles.value = res.roles
-  }).finally(() => {
-    loading.value = false
-  })
-}
+  },
+  delete: deleteManager,
+  update: updateManagerStatus
+});
 
-getData()
-
-//删除
-const handleDelete = (id) => {
-  loading.value = true;
-  deleteManager(id).then(res => {
-    toast("删除成功")
-    getData()
-  }).finally(() => {
-    loading.value = false;
-  })
-}
-//表单部分
-const formDrawerRef = ref(null);
-const formRef = ref(null)
-const form = reactive({
-  username: "",
-  password: "",
-  role_id: null,
-  status: 1,
-  avatar: ""
-
-})
-const rules = {}
-
-const editId = ref(0)
-const drawerTitle = computed(() => editId.value ? "修改" : "新增")
-
-//新增
-const handleSumbit = () => {
-  formRef.value.validate((vaild) => {
-    //如果vaild为false 就证明验证没有通过
-    if (!vaild) return;
-    formDrawerRef.value.showLoading();
-
-    const fun = editId.value ? updateManager(editId.value, form.value) : createManager(form)
-
-
-    fun.then(res => {
-      toast(drawerTitle.value + "成功")
-      getData(1)
-      formDrawerRef.value.close();
-    }).finally(() => {
-      formDrawerRef.value.hideLoading();
-    })
-  })
-}
-
-//重置表单的方法
-function resetForm(row = false) {
-  if (formRef.value) formRef.value.clearValidate()
-  if (row) {
-    for (const key in form) {
-      //拿进来form值，赋值给表单的值
-      form[key] = row[key];
-    }
-  }
-}
-
-//修改
-const handleEdit = (row) => {
-  editId.value = row.id;
-  resetForm(row);
-  formDrawerRef.value.open()
-}
-
-//拉出来表单
-const handleCreate = () => {
-  editId.value = 0;
-  resetForm({
+const {
+  formDrawerRef,
+  formRef,
+  form,
+  rules,
+  editId,
+  drawerTitle,
+  handleSumbit,
+  resetForm,
+  handleEdit,
+  handleCreate
+} = useInitForm({
+  form: {
     username: "",
     password: "",
     role_id: null,
     status: 1,
     avatar: ""
-  });
-  formDrawerRef.value.open();
-}
+  },
+  getData,
+  update: updateManager,
+  create: createManager
+})
 
-//修改状态
-const handleStatusChange = (status, row) => {
-  row.statusLoading = true;
-  updateManagerStatus(row.id, status).then(res => {
-    toast("修改状态成功")
-    row.status = status;
-  }).finally(() => {
-    row.statusLoading = false;
-  })
-}
+
+
 
 
 </script>

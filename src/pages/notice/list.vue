@@ -55,113 +55,59 @@ import { ref, reactive, computed } from 'vue'
 import { getNoticeList, createNotice, updateNotice, deleteNotice } from '@/api/notice.js'
 import FromDrawer from '@/components/FormDrawer.vue'
 import { toast } from '@/composables/util.js'
-
-const tableData = ref([])
-
-const loading = ref(false);
-
-const currentPage = ref(1)
-const total = ref(0)
-const limit = ref(10);
+import { useInitTable, useInitForm } from '@/composables/useCommon.js'
 
 
-//获取数据
-function getData(p = null) {
-  if (typeof p == "number") {
-    currentPage.value = p
-  }
-  loading.value = true;
-  getNoticeList(currentPage.value).then(res => {
-    console.log(res);
-    tableData.value = res.list
-    total.value = res.totalCount
-  }).finally(() => {
-    loading.value = false
-  })
-}
 
-getData()
+const {
 
-//删除
-const handleDelete = (id) => {
-  loading.value = true;
-  deleteNotice(id).then(res => {
-    toast("删除成功")
-    getData()
-  }).finally(() => {
-    loading.value = false;
-  })
-}
-//表单部分
-const formDrawerRef = ref(null);
-const formRef = ref(null)
-const form = reactive({
-  title: "",
-  content: ""
-})
-const rules = {
-  title: [{
-    required: true,
-    message: "公告标题不能为空",
-    trigger: 'blur'
-  }],
-  content: [{
-    required: true,
-    message: "公告内容不能为空",
-    trigger: 'blur'
-  }]
-}
-
-const editId = ref(0)
-const drawerTitle = computed(() => editId.value ? "修改" : "新增")
-
-//新增
-const handleSumbit = () => {
-  formRef.value.validate((vaild) => {
-    //如果vaild为false 就证明验证没有通过
-    if (!vaild) return;
-    formDrawerRef.value.showLoading();
-
-    const fun = editId.value ? updateNotice(editId.value, form.value) : createNotice(form)
+  tableData,
+  loading,
+  currentPage,
+  total,
+  limit,
+  getData,
+  handleDelete,
+} = useInitTable({
+  getList: getNoticeList,
+  delete: deleteNotice
+});
 
 
-    fun.then(res => {
-      toast(drawerTitle.value + "成功")
-      getData(1)
-      formDrawerRef.value.close();
-    }).finally(() => {
-      formDrawerRef.value.hideLoading();
-    })
-  })
-}
-
-//重置表单的方法
-function resetForm(row = false) {
-  if (formRef.value) formRef.value.clearValidate()
-  if (row) {
-    for (const key in form) {
-      //拿进来form值，赋值给表单的值
-      form[key] = row[key];
-    }
-  }
-}
-
-//修改
-const handleEdit = (row) => {
-  editId.value = row.id;
-  resetForm(row);
-  formDrawerRef.value.open()
-}
-
-//拉出来表单
-const handleCreate = () => {
-  editId.value = 0;
-  resetForm({
+const {
+  formDrawerRef,
+  formRef,
+  form,
+  rules,
+  editId,
+  drawerTitle,
+  handleSumbit,
+  resetForm,
+  handleEdit,
+  handleCreate
+} = useInitForm({
+  form: {
     title: "",
     content: ""
-  });
-  formDrawerRef.value.open();
-}
+  },
+  rules: {
+    title: [{
+      required: true,
+      message: "公告标题不能为空",
+      trigger: 'blur'
+    }],
+    content: [{
+      required: true,
+      message: "公告内容不能为空",
+      trigger: 'blur'
+    }]
+  },
+  getData,
+  update: updateNotice,
+  create: createNotice,
+})
+
+
 </script>
 
 <style scoped>
