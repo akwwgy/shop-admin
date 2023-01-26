@@ -11,6 +11,9 @@
               :initial-index="0"></el-image>
             <div class="image-title">{{ item.name }}</div>
             <div class="flex items-center justify-center p-2">
+              <!-- 添加复选框 -->
+              <el-checkbox v-model="item.checked" @change="handleChooseChange(item)" />
+
 
               <el-checkbox v-if="openChoose" v-model="item.checked" @change="handleChooseChange(item)" />
 
@@ -75,7 +78,10 @@ function getData(p = null) {
   loading.value = true;
   getImageList(image_class_id.value, currentPage.value).then(res => {
     total.value = res.totalCount
-    list.value = res.list;
+    list.value = res.list.map(o => {
+      o.checked = false;
+      return o;
+    })
 
   }).finally(() => {
     loading.value = false
@@ -114,8 +120,28 @@ const handleDelete = (id) => {
     })
 }
 
+defineProps({
+  openChoose: {
+    type: Boolean,
+    default: false
+  }
+})
+
 //上传成功
 const handleUploadSuccess = () => getData(1)
+
+//选中的图片
+const emits = defineEmits(["choose"])
+const checkedImage = computed(() => list.value.filter(o => o.checked))
+
+const handleChooseChange = (item) => {
+  console.log(checkedImage.value);
+  if (item.checked && checkedImage.value.length > 1) {
+    item.checked = false;
+    return toast("最多只能选择一张", "error")
+  }
+  emits("choose", checkedImage.value)
+}
 
 defineExpose({
   loadData,

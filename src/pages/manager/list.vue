@@ -115,6 +115,7 @@
 import { ref, reactive, computed } from 'vue'
 import { getManagerList, updateManagerStatus, createManager, updateManager, deleteManager } from '@/api/manager.js'
 import FormDrawer from '@/components/FormDrawer.vue'
+import ChooseImage from '@/components/ChooseImage.vue'
 import { toast } from '@/composables/util.js'
 
 const searchForm = reactive({
@@ -247,6 +248,8 @@ const handleStatusChange = (status, row) => {
     row.statusLoading = false;
   })
 }
+
+
 </script>
 
 <style scoped>
