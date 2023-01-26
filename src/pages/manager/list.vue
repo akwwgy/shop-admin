@@ -1,5 +1,23 @@
 <template>
   <el-card shadow="never" class="border-0">
+    <!-- 搜索框 -->
+    <el-form :model="searchForm" label-width="80px" class=" mb-3">
+      <el-row :gutter="20">
+        <el-col :span="8" :offset="0">
+          <el-form-item label="关键词">
+            <el-input v-model="searchForm.keyword" placeholder="管理员昵称" clearable></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" :offset="8">
+          <el-form-item>
+            <div class=" flex justify-end items-center">
+              <el-button type="primary" @click="getData">搜索</el-button>
+              <el-button type="primary" @click="resetSearchFrom">重置</el-button>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
     <!-- //新增刷新 -->
     <div class=" flex justify-between items-center mb-4">
       <el-button type="primary" size="small" @click="handleCreate">
@@ -81,6 +99,15 @@ import { getManagerList } from '@/api/manager.js'
 import FromDrawer from '@/components/FormDrawer.vue'
 import { toast } from '@/composables/util.js'
 
+const searchForm = reactive({
+  keyword: ""
+})
+
+const resetSearchFrom = () => {
+  searchForm.keyword = "";
+  getData();
+}
+
 const tableData = ref([])
 
 const loading = ref(false);
@@ -96,7 +123,8 @@ function getData(p = null) {
     currentPage.value = p
   }
   loading.value = true;
-  getManagerList(currentPage.value, {}).then(res => {
+  //searchForm本来就是reactive类型的,正好需要传对象类型的,所以我们直接传searchForm即可
+  getManagerList(currentPage.value, searchForm).then(res => {
     console.log(res);
     tableData.value = res.list
     total.value = res.totalCount
