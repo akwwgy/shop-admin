@@ -14,13 +14,37 @@
       </el-tooltip>
     </div>
     <el-table :data="tableData" stripe style="width:100%" v-loading="loading">
-      <el-table-column prop="title" label="公告标题"></el-table-column>
+      <el-table-column label="管理员" width="200">
+        <template #default="{ row }">
+          <div>
+            <el-avatar :size="40" src="row.avatar" @error="errorHandler">
+              <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png" />
+            </el-avatar>
+          </div>
+          <div class="ml-3">
+            <h2>{{ row.username }}</h2>
+            <small>ID:{{ row.id }}</small>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="所属管理员" align="center">
+        <template #default="{ row }">
+          {{ row.role ? row.role.name : "" }}
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="120">
+        <template #default="{ row }">
+          <el-switch :module="row.status" :active-value="1" :inactive-value="0">
+          </el-switch>
+
+        </template>
+      </el-table-column>
       <el-table-column prop="create_time" label="发布时间" width="380"></el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
           <el-button type="primary" size="small" text @click="handleEdit(scope.row)">修改</el-button>
           <span @click.stop="() => { }">
-            <el-popconfirm title="是否要删除该分类？" confirmButtonText="确认" cancelButtonText="取消" @confirm="handleDelete">
+            <el-popconfirm title="是否要删除该管理员？" confirmButtonText="确认" cancelButtonText="取消" @confirm="handleDelete">
               <template #reference>
                 <el-button text class="px-1" type="primary" size="small" @click="handleDelete(scope.row.id)">
                   删除
@@ -53,6 +77,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { getNoticeList, createNotice, updateNotice, deleteNotice } from '@/api/notice.js'
+import { getManagerList } from '@/api/manager.js'
 import FromDrawer from '@/components/FormDrawer.vue'
 import { toast } from '@/composables/util.js'
 
@@ -71,7 +96,7 @@ function getData(p = null) {
     currentPage.value = p
   }
   loading.value = true;
-  getNoticeList(currentPage.value).then(res => {
+  getManagerList(currentPage.value, {}).then(res => {
     console.log(res);
     tableData.value = res.list
     total.value = res.totalCount
