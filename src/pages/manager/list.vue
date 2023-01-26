@@ -19,18 +19,7 @@
       </el-row>
     </el-form>
     <!-- //新增刷新 -->
-    <div class=" flex justify-between items-center mb-4">
-      <el-button type="primary" size="small" @click="handleCreate">
-        新增
-      </el-button>
-      <el-tooltip class="box-item" effect="dark" content="刷新数据" placement="top" @click="getData">
-        <el-button text>
-          <el-icon :size="20">
-            <Refresh />
-          </el-icon>
-        </el-button>
-      </el-tooltip>
-    </div>
+    <ListHeader @create="handleCreate" @refresh="getData"></ListHeader>
     <el-table :data="tableData" stripe style="width:100%" v-loading="loading">
       <el-table-column label="管理员" width="200">
         <template #default="{ row }">
@@ -116,6 +105,7 @@ import { ref } from 'vue'
 import { getManagerList, updateManagerStatus, createManager, updateManager, deleteManager } from '@/api/manager.js'
 import FormDrawer from '@/components/FormDrawer.vue'
 import ChooseImage from '@/components/ChooseImage.vue'
+import ListHeader from "@/components/ListHeader.vue"
 
 import { useInitTable, useInitForm } from '@/composables/useCommon.js'
 

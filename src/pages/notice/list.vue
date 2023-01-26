@@ -1,18 +1,7 @@
 <template>
   <el-card shadow="never" class="border-0">
     <!-- //新增刷新 -->
-    <div class=" flex justify-between items-center mb-4">
-      <el-button type="primary" size="small" @click="handleCreate">
-        新增
-      </el-button>
-      <el-tooltip class="box-item" effect="dark" content="刷新数据" placement="top" @click="getData">
-        <el-button text>
-          <el-icon :size="20">
-            <Refresh />
-          </el-icon>
-        </el-button>
-      </el-tooltip>
-    </div>
+    <ListHeader @create="handleCreate" @refresh="getData"></ListHeader>
     <el-table :data="tableData" stripe style="width:100%" v-loading="loading">
       <el-table-column prop="title" label="公告标题"></el-table-column>
       <el-table-column prop="create_time" label="发布时间" width="380"></el-table-column>
@@ -51,10 +40,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import ListHeader from "@/components/ListHeader.vue"
 import { getNoticeList, createNotice, updateNotice, deleteNotice } from '@/api/notice.js'
 import FromDrawer from '@/components/FormDrawer.vue'
-import { toast } from '@/composables/util.js'
 import { useInitTable, useInitForm } from '@/composables/useCommon.js'
 
 

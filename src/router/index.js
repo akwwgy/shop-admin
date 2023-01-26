@@ -51,7 +51,8 @@ const routes = [
     meta: {
       title: "登录页"
     }
-  }]
+  }
+]
 
 //动态路由,用于匹配菜单动态添加路由
 const asyncRoutes = [
@@ -103,6 +104,14 @@ const asyncRoutes = [
       title: "管理员管理"
     }
   },
+  {
+    path: "/access/list",
+    name: "/access/list",
+    component: () => import("@/pages/access/list.vue"),
+    meta: {
+      title: "菜单权限管理"
+    }
+  }
 ]
 
 export const router = createRouter({
