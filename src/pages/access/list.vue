@@ -33,7 +33,10 @@
             placeholder="请选择上级菜单" />
         </el-form-item>
         <el-form-item label="菜单/规则" prop="menu">
-          <el-input v-model="form.menu"></el-input>
+          <el-radio-group v-model="form.menu">
+            <el-radio :label="1" border>菜单</el-radio>
+            <el-radio :label="0" border>规则</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="名称" prop="name">
           <el-input v-model="form.name" style="width: 30%;" placeholder="名称"></el-input>
