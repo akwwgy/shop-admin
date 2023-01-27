@@ -107,7 +107,7 @@ export function useInitForm(opt = {}) {
   const drawerTitle = computed(() => editId.value ? "修改" : "新增")
 
   //新增
-  const handleSumbit = () => {
+  const handleSubmit = () => {
     formRef.value.validate((vaild) => {
       //如果vaild为false 就证明验证没有通过
       if (!vaild) return;
@@ -115,7 +115,7 @@ export function useInitForm(opt = {}) {
 
       const fun = editId.value ? opt.update(editId.value, form.value) : opt.create(form)
 
-      console.log(111);
+      console.log(form);
       fun.then(res => {
         toast(drawerTitle.value + "成功")
         // 修改刷新当前页，新增刷新第一页
@@ -163,7 +163,7 @@ export function useInitForm(opt = {}) {
     rules,
     editId,
     drawerTitle,
-    handleSumbit,
+    handleSubmit,
     resetForm,
     handleEdit,
     handleCreate

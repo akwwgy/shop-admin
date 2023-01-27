@@ -1,33 +1,37 @@
 <template>
-  <el-card shadow="never" class=" border-0">
-    <ListHeader @create="handleCreate" @refresh="getData"></ListHeader>
-    <!-- 必须指定props,不然值没法显示 -->
+  <el-card shadow="never" class="border-0">
+    <ListHeader @create="handleCreate" @refresh="getData" />
     <el-tree :data="tableData" :props="{ label: 'name', children: 'child' }" v-loading="loading" node-key="id"
       :default-expanded-keys="defaultExpandedKeys">
       <template #default="{ node, data }">
         <div class="custom-tree-node">
-          <el-tag size="small" :type="data.menu ? '' : 'info'">
-            {{ data.menu ? "菜单" : "权限" }}
-          </el-tag>
-          <!-- 图标 -->
-          <el-icon v-if="data.icon" :size="small" class="ml-2">
+          <el-tag size="small" :type="data.menu ? '' : 'info'">{{ data.menu ? "菜单" : "权限" }}</el-tag>
+          <el-icon v-if="data.icon" :size="16" class="ml-2">
             <component :is="data.icon" />
           </el-icon>
           <span>{{ data.name }}</span>
+
           <div class="ml-auto">
             <el-switch :modelValue="data.status" :active-value="1" :inactive-value="0"
               @change="handleStatusChange($event, data)" />
             <el-button text type="primary" size="small" @click.stop="handleEdit(data)">修改</el-button>
-            <el-button text type="primary" size="small">增加</el-button>
-            <el-button text type="primary" size="small">删除</el-button>
+            <el-button text type="primary" size="small" @click.stop="addChild(data.id)">增加</el-button>
+
+            <el-popconfirm title="是否要删除该记录？" confirmButtonText="确认" cancelButtonText="取消"
+              @confirm="handleDelete(data.id)">
+              <template #reference>
+                <el-button text type="primary" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
           </div>
+
         </div>
       </template>
     </el-tree>
-    <FormDrawer :title="drawerTitle" ref="formDrawerRef" @submit="handleSubmit">
+
+    <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
       <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
         <el-form-item label="上级菜单" prop="rule_id">
-          <!-- emitPath: false必须设置成false不然返回的就是一个对象，而不是一个id -->
           <el-cascader v-model="form.rule_id" :options="options"
             :props="{ value: 'id', label: 'name', children: 'child', checkStrictly: true, emitPath: false }"
             placeholder="请选择上级菜单" />
@@ -58,28 +62,36 @@
         <el-form-item label="排序" prop="order">
           <el-input-number v-model="form.order" :min="0" :max="1000" />
         </el-form-item>
-
       </el-form>
-
     </FormDrawer>
 
   </el-card>
-
 </template>
-
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue"
 import ListHeader from "@/components/ListHeader.vue"
-import FormDrawer from '@/components/FormDrawer.vue'
+import FormDrawer from "@/components/FormDrawer.vue"
 import IconSelect from "@/components/IconSelect.vue"
-import { getRuleList, createRule, updateRule } from '@/api/rule.js'
-import { useInitTable, useInitForm } from '@/composables/useCommon.js'
+import {
+  getRuleList,
+  createRule,
+  updateRule,
+  updateRuleStatus,
+  deleteRule
+} from "@/api/rule.js"
 
+import {
+  useInitTable,
+  useInitForm
+} from "@/composables/useCommon.js"
+
+const options = ref([])
 const defaultExpandedKeys = ref([])
 const {
   loading,
   tableData,
   getData,
+
   handleDelete,
   handleStatusChange
 } = useInitTable({
@@ -88,10 +100,11 @@ const {
     options.value = res.rules
     tableData.value = res.list
     defaultExpandedKeys.value = res.list.map(o => o.id)
-  }
-});
+  },
+  delete: deleteRule,
+  updateStatus: updateRuleStatus
+})
 
-const options = ref([])
 
 const {
   formDrawerRef,
@@ -114,19 +127,25 @@ const {
     icon: "",
     frontpath: ""
   },
-  rules: {
-  },
+  rules: {},
+
   getData,
+
   update: updateRule,
-  create: createRule,
+  create: createRule
 })
 
 
-</script>
+// 添加子分类
+const addChild = (id) => {
+  handleCreate()
+  form.rule_id = id
+  form.status = 1
+}
 
-<style scoped>
+</script>
+<style>
 .custom-tree-node {
-  /* 因为显示没有沾满全行，所以给一个flex:1 */
   flex: 1;
   display: flex;
   align-items: center;

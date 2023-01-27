@@ -24,7 +24,7 @@ defineProps({
 })
 const emit = defineEmits(["update:modelValue"])
 const icons = ref(Object.keys(iconList))
-console.log(icons.value);
+// console.log(icons.value);
 
 const handleChange = (e) => {
   emit("update:modelValue", e);
