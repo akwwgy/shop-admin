@@ -35,7 +35,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { useStore } from 'vuex'
 const router = useRouter();
 const store = useStore();
@@ -51,6 +51,10 @@ const asideMenus = computed(() => store.state.menus)
 const handleSelect = (e) => {
   router.push(e)
 }
+
+onBeforeRouteUpdate((to, from) => {
+  defaultActive.value = to.path
+})
 
 </script>
 
