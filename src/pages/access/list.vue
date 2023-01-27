@@ -71,6 +71,7 @@
 import { ref } from 'vue'
 import ListHeader from "@/components/ListHeader.vue"
 import FormDrawer from '@/components/FormDrawer.vue'
+import IconSelect from "@/components/IconSelect.vue"
 import { getRuleList, createRule, updateRule } from '@/api/rule.js'
 import { useInitTable, useInitForm } from '@/composables/useCommon.js'
 
