@@ -6,7 +6,7 @@
       <el-table-column label="优惠券名称" width="350px">
         <!-- 自定义插槽 -->
         <template #default="{ row }">
-          <div class="border border-dashed py-2 px-2 rounded">
+          <div class="border border-dashed py-2 px-2 rounded" :class="row.statusText == '领取中' ? 'active' : 'inactive'">
             <h5 class="font-bold text-md">{{ row.name }}</h5>
             <small>{{ row.start_time }}~{{ row.end_time }}</small>
           </div>
@@ -74,8 +74,31 @@ const {
   handleDelete,
 } = useInitTable({
   getList: getCouponList,
+  onGetListSuccess: (res) => {
+    tableData.value = res.list.map(o => {
+      o.statusText = formatStatus(o)
+      return o;
+    })
+    console.log(tableData.value);
+    total.value = res.totalCount;
+  },
   delete: deleteCoupon
 });
+
+function formatStatus(row) {
+  let s = "领取中";
+  let start_time = (new Date(row.start_time)).getTime()
+  let now = (new Date()).getTime()
+  let end_time = (new Date(row.end_time)).getTime()
+  if (start_time > now) {
+    s = "未开始"
+  } else if (end_time < now) {
+    s = "已结束"
+  } else if (row.status == 0) {
+    s = "已失效"
+  }
+  return s;
+}
 
 
 const {
@@ -114,5 +137,11 @@ const {
 </script>
 
 <style scoped>
+.active {
+  @apply border-rose-200 bg-rose-50 text-red-400
+}
 
+.inactive {
+  @apply border-gray-200 bg-gray-50 text-gray-400
+}
 </style>
