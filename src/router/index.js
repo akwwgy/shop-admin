@@ -128,6 +128,14 @@ const asyncRoutes = [
       title: "规格管理"
     }
   },
+  {
+    path: "/coupon/list",
+    name: "/coupon/list",
+    component: () => import("@/pages/coupon/list.vue"),
+    meta: {
+      title: "优惠券管理"
+    }
+  },
 
 ]
 
