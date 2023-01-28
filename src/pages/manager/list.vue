@@ -74,7 +74,7 @@
       <el-pagination background layout="prev, pager,next" :total="total" :current-page="currentPage" :page-size="limit"
         @current-change="getData" />
     </div>
-    <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSumbit">
+    <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
       <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="用户名"></el-input>
@@ -138,7 +138,7 @@ const {
     roles.value = res.roles
   },
   delete: deleteManager,
-  update: updateManagerStatus
+  updateStatus: updateManagerStatus
 });
 
 const {
@@ -146,12 +146,10 @@ const {
   formRef,
   form,
   rules,
-  editId,
   drawerTitle,
-  handleSumbit,
-  resetForm,
+  handleSubmit,
+  handleCreate,
   handleEdit,
-  handleCreate
 } = useInitForm({
   form: {
     username: "",
