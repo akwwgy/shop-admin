@@ -57,6 +57,7 @@
 <script setup>
 import ListHeader from "@/components/ListHeader.vue";
 import FormDrawer from "@/components/FormDrawer.vue";
+import TagInput from '@/components/TagInput.vue'
 import {
   getSkusList,
   createSkus,
