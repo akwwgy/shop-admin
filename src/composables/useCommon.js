@@ -153,7 +153,7 @@ export function useInitForm(opt = {}) {
         body = form
       }
 
-      const fun = editId.value ? opt.update(editId.value, form) : opt.create(form)
+      const fun = editId.value ? opt.update(editId.value, body) : opt.create(body)
 
       fun.then(res => {
         toast(drawerTitle.value + "成功")
