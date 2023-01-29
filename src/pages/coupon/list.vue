@@ -23,17 +23,22 @@
       <el-table-column prop="used" label="已使用" />
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
-          <el-button type="primary" size="small" text @click="handleEdit(scope.row)">修改</el-button>
-          <span @click.stop="() => { }">
-            <el-popconfirm title="是否要删除该分类？" confirmButtonText="确认" cancelButtonText="取消"
-              @confirm="handleDelete(scope.row.id)">
-              <template #reference>
-                <el-button text class="px-1" type="primary" size="small">
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
-          </span>
+          <el-button v-if="scope.row.statusText == '未开始'" type="primary" size="small" text
+            @click="handleEdit(scope.row)">修改</el-button>
+
+          <el-popconfirm v-if="scope.row.statusText != '领取中'" title="是否要删除该优惠券？" confirmButtonText="确认"
+            cancelButtonText="取消" @confirm="handleDelete(scope.row.id)">
+            <template #reference>
+              <el-button text type="primary" size="small">删除</el-button>
+            </template>
+          </el-popconfirm>
+
+          <el-popconfirm v-if="scope.row.statusText == '领取中'" title="是否要让该优惠券失效？" confirmButtonText="失效"
+            cancelButtonText="取消" @confirm="handleStatusChange(0, scope.row)">
+            <template #reference>
+              <el-button type="danger" size="small">失效</el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -98,6 +103,7 @@ const {
   limit,
   getData,
   handleDelete,
+  handleStatusChange
 } = useInitTable({
   getList: getCouponList,
   onGetListSuccess: (res) => {
@@ -108,7 +114,8 @@ const {
     console.log(tableData.value);
     total.value = res.totalCount;
   },
-  delete: deleteCoupon
+  delete: deleteCoupon,
+  updateStatus: updateCouponStatus
 });
 
 function formatStatus(row) {
