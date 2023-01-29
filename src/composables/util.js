@@ -46,3 +46,18 @@ export function showFullLoading() {
 export function hideFullLoading() {
   nProgress.done();
 }
+
+
+//将query对象转成url参数
+export function queryParams(query) {
+  let q = []
+  for (const key in query) {
+    if (query[key]) {
+      //防止参数丢失，使用encodeURIComponent
+      q.push(`${key}=${encodeURIComponent(query[key])}`)
+    }
+  }
+  let r = q.join("&");
+  r = r ? ("?" + r) : ""
+  return r;
+}
