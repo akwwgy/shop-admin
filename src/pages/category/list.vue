@@ -1,21 +1,16 @@
 <template>
   <el-card shadow="never" class="border-0">
     <ListHeader @create="handleCreate" @refresh="getData" />
-    <el-tree :data="tableData" :props="{ label: 'name', children: 'child' }" v-loading="loading" node-key="id"
-      :default-expanded-keys="defaultExpandedKeys">
+    <el-tree :data="tableData" :props="{ label: 'name', children: 'child' }" v-loading="loading" node-key="id">
       <template #default="{ node, data }">
         <div class="custom-tree-node">
-          <el-tag size="small" :type="data.menu ? '' : 'info'">{{ data.menu ? "菜单" : "权限" }}</el-tag>
-          <el-icon v-if="data.icon" :size="16" class="ml-2">
-            <component :is="data.icon" />
-          </el-icon>
           <span>{{ data.name }}</span>
-
           <div class="ml-auto">
+            <el-button text type="primary" size="small">推荐商品</el-button>
             <el-switch :modelValue="data.status" :active-value="1" :inactive-value="0"
               @change="handleStatusChange($event, data)" />
             <el-button text type="primary" size="small" @click.stop="handleEdit(data)">修改</el-button>
-            <el-button text type="primary" size="small" @click.stop="addChild(data.id)">增加</el-button>
+
 
             <el-popconfirm title="是否要删除该记录？" confirmButtonText="确认" cancelButtonText="取消"
               @confirm="handleDelete(data.id)">
@@ -31,11 +26,6 @@
 
     <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
       <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
-        <el-form-item label="上级菜单" prop="rule_id">
-          <el-cascader v-model="form.rule_id" :options="options"
-            :props="{ value: 'id', label: 'name', children: 'child', checkStrictly: true, emitPath: false }"
-            placeholder="请选择上级菜单" />
-        </el-form-item>
         <el-form-item label="菜单/规则" prop="menu">
           <el-radio-group v-model="form.menu">
             <el-radio :label="1" border>菜单</el-radio>
@@ -73,19 +63,18 @@ import ListHeader from "@/components/ListHeader.vue"
 import FormDrawer from "@/components/FormDrawer.vue"
 import IconSelect from "@/components/IconSelect.vue"
 import {
-  getRuleList,
-  createRule,
-  updateRule,
-  updateRuleStatus,
-  deleteRule
-} from "@/api/rule.js"
+  getCategoryList,
+  createCategory,
+  updateCategory,
+  updateCategoryStatus,
+  deleteCategory
+} from "@/api/Category.js"
 
 import {
   useInitTable,
   useInitForm
 } from "@/composables/useCommon.js"
 
-const options = ref([])
 const defaultExpandedKeys = ref([])
 const {
   loading,
@@ -95,14 +84,12 @@ const {
   handleDelete,
   handleStatusChange
 } = useInitTable({
-  getList: getRuleList,
+  getList: getCategoryList,
   onGetListSuccess: (res) => {
-    options.value = res.rules
-    tableData.value = res.list
-    defaultExpandedKeys.value = res.list.map(o => o.id)
+    tableData.value = res
   },
-  delete: deleteRule,
-  updateStatus: updateRuleStatus
+  delete: deleteCategory,
+  updateStatus: updateCategoryStatus
 })
 
 
@@ -131,17 +118,11 @@ const {
 
   getData,
 
-  update: updateRule,
-  create: createRule
+  update: updateCategory,
+  create: createCategory
 })
 
 
-// 添加子分类
-const addChild = (id) => {
-  handleCreate()
-  form.rule_id = id
-  form.status = 1
-}
 
 </script>
 <style>

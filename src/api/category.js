@@ -17,3 +17,7 @@ export function updateCategoryStatus(id, status) {
     status
   })
 }
+
+export function deleteCategory(id) {
+  return axios.post(`/admin/category/${id}/delete`)
+}
