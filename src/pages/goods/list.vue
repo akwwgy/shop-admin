@@ -1,30 +1,47 @@
 <template>
   <div>
-    <el-tabs v-model="searchForm.tab" class="demo-tabs" @tab-change="getData">
-      <el-tab-pane :label="item.name" :name="item.key" v-for="(item, index) in tabbars"></el-tab-pane>
+    <el-tabs v-model="searchForm.tab" @tab-change="getData">
+      <el-tab-pane :label="item.name" :name="item.key" v-for="(item, index) in tabbars" :key="index"></el-tab-pane>
     </el-tabs>
+
     <el-card shadow="never" class="border-0">
-      <!-- 搜索框 -->
-      <el-form :model="searchForm" label-width="80px" class=" mb-3">
-        <el-row :gutter="20">
-          <el-col :span="8" :offset="0">
-            <el-form-item label="关键词">
-              <el-input v-model="searchForm.title" placeholder="商品名称" clearable></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" :offset="8">
-            <el-form-item>
-              <div class=" flex justify-end items-center">
-                <el-button type="primary" @click="getData">搜索</el-button>
-                <el-button type="primary" @click="resetSearchFrom">重置</el-button>
-              </div>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <!-- //新增刷新 -->
-      <ListHeader @create="handleCreate" @refresh="getData"></ListHeader>
-      <el-table :data="tableData" stripe style="width:100%" v-loading="loading">
+      <!-- 搜索 -->
+      <Search :model="searchForm" @search="getData" @reset="resetSearchForm">
+        <SearchItem label="关键词">
+          <el-input v-model="searchForm.title" placeholder="商品名称" clearable></el-input>
+        </SearchItem>
+        <template #show>
+          <SearchItem label="商品分类">
+            <el-select v-model="searchForm.category_id" placeholder="请选择商品分类" clearable>
+              <el-option v-for="item in category_list" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </SearchItem>
+        </template>
+      </Search>
+
+      <!-- 新增|刷新 -->
+      <ListHeader layout="create,refresh" @create="handleCreate" @refresh="getData">
+
+        <el-button type="danger" size="small" @click="handleMultiDelete"
+          v-if="searchForm.tab != 'delete'">批量删除</el-button>
+        <el-button type="warning" size="small" @click="handleRestoreGoods" v-else>恢复商品</el-button>
+
+        <el-popconfirm v-if="searchForm.tab == 'delete'" title="是否要彻底删除该商品？" confirmButtonText="确认"
+          cancelButtonText="取消" @confirm="handleDestroyGoods">
+          <template #reference>
+            <el-button type="danger" size="small">彻底删除</el-button>
+          </template>
+        </el-popconfirm>
+
+        <el-button size="small" @click="handleMultiStatusChange(1)"
+          v-if="searchForm.tab == 'all' || searchForm.tab == 'off'">上架</el-button>
+        <el-button size="small" @click="handleMultiStatusChange(0)"
+          v-if="searchForm.tab == 'all' || searchForm.tab == 'saling'">下架</el-button>
+      </ListHeader>
+
+      <el-table ref="multipleTableRef" @selection-change="handleSelectionChange" :data="tableData" stripe
+        style="width: 100%" v-loading="loading">
         <el-table-column type="selection" width="55" />
         <el-table-column label="商品" width="300">
           <template #default="{ row }">
@@ -88,59 +105,119 @@
         </el-table-column>
       </el-table>
 
-      <div class="flex justify-center items-center mt-5">
-        <el-pagination background layout="prev, pager,next" :total="total" :current-page="currentPage"
+      <div class="flex items-center justify-center mt-5">
+        <el-pagination background layout="prev, pager ,next" :total="total" :current-page="currentPage"
           :page-size="limit" @current-change="getData" />
       </div>
+
       <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
         <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="form.username" placeholder="用户名"></el-input>
+          <el-form-item label="商品名称" prop="title">
+            <el-input v-model="form.title" placeholder="请输入商品名称，不能超过60个字符"></el-input>
           </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input v-model="form.password" placeholder="密码"></el-input>
+          <el-form-item label="封面" prop="cover">
+            <ChooseImage v-model="form.cover" />
           </el-form-item>
-          <el-form-item label="头像" prop="avatar">
-            <ChooseImage v-model="form.avatar" />
-          </el-form-item>
-          <el-form-item label="所属角色" prop="role_id">
-            <el-select v-model="form.role_id" placeholder="选择所属角色">
-              <el-option v-for="item in roles" :key="item.id" :label="item.name" :value="item.id">
-              </el-option>
+          <el-form-item label="商品分类" prop="category_id">
+            <el-select v-model="form.category_id" placeholder="选择所属商品分类">
+              <el-option v-for="item in category_list" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="状态" prop="content">
-            <el-switch v-model="form.status" :active-value="1" :inactive-value="0">
-            </el-switch>
+          <el-form-item label="商品描述" prop="desc">
+            <el-input type="textarea" v-model="form.desc" placeholder="选填，商品卖点"></el-input>
+          </el-form-item>
+          <el-form-item label="单位" prop="unit">
+            <el-input v-model="form.unit" placeholder="请输入单位" style="width:50%;"></el-input>
+          </el-form-item>
+          <el-form-item label="总库存" prop="stock">
+            <el-input v-model="form.stock" type="number" style="width:40%;">
+              <template #append>件</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="库存预警" prop="min_stock">
+            <el-input v-model="form.min_stock" type="number" style="width:40%;">
+              <template #append>件</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="最低销售价" prop="min_price">
+            <el-input v-model="form.min_price" type="number" style="width:40%;">
+              <template #append>元</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="最低原价" prop="min_oprice">
+            <el-input v-model="form.min_oprice" type="number" style="width:40%;">
+              <template #append>元</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="库存显示" prop="stock_display">
+            <el-radio-group v-model="form.stock_display">
+              <el-radio :label="0">隐藏</el-radio>
+              <el-radio :label="1">显示</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="是否上架" prop="status">
+            <el-radio-group v-model="form.status">
+              <el-radio :label="0">放入仓库</el-radio>
+              <el-radio :label="1">立即上架</el-radio>
+            </el-radio-group>
           </el-form-item>
         </el-form>
       </FormDrawer>
+
     </el-card>
+
+    <banners ref="bannersRef" @reload-data="getData" />
+    <content ref="contentRef" @reload-data="getData" />
+    <skus ref="skusRef" @reload-data="getData" />
+
   </div>
 </template>
-
 <script setup>
-import { ref } from 'vue'
-import { getGoodsList, updateGoodsStatus, createGoods, updateGoods, deleteGoods } from '@/api/goods.js'
-import FormDrawer from '@/components/FormDrawer.vue'
-import ChooseImage from '@/components/ChooseImage.vue'
-import ListHeader from "@/components/ListHeader.vue"
+import { ref } from "vue"
+import ListHeader from "@/components/ListHeader.vue";
+import FormDrawer from "@/components/FormDrawer.vue";
+import ChooseImage from "@/components/ChooseImage.vue";
+import Search from "@/components/Search.vue";
+import SearchItem from "@/components/SearchItem.vue";
+import banners from "./banners.vue";
+import content from "./content.vue";
+import skus from "./skus.vue";
+import {
+  getGoodsList,
+  updateGoodsStatus,
+  createGoods,
+  updateGoods,
+  deleteGoods,
+  restoreGoods,
+  destroyGoods
+} from "@/api/goods"
+import {
+  getCategoryList
+} from "@/api/category"
 
 import { useInitTable, useInitForm } from '@/composables/useCommon.js'
 
-const roles = ref([])
+import {
+  toast
+} from "@/composables/util"
 
 const {
+  handleSelectionChange,
+  multipleTableRef,
+  handleMultiDelete,
+
   searchForm,
-  resetSearchFrom,
+  resetSearchForm,
   tableData,
   loading,
   currentPage,
   total,
   limit,
+  getData,
   handleDelete,
-  handleStatusChange,
-  getData
+  handleMultiStatusChange,
+
+  multiSelectionIds
 } = useInitTable({
   searchForm: {
     title: "",
@@ -149,18 +226,17 @@ const {
   },
   getList: getGoodsList,
   onGetListSuccess: (res) => {
-    // console.log(res);
     tableData.value = res.list.map(o => {
-      //利用map添加属性
-      o.statusLoading = false;
+      o.bannersLoading = false
+      o.contentLoading = false
+      o.skusLoading = false
       return o
     })
     total.value = res.totalCount
-    roles.value = res.roles
   },
   delete: deleteGoods,
   updateStatus: updateGoodsStatus
-});
+})
 
 const {
   formDrawerRef,
@@ -170,14 +246,20 @@ const {
   drawerTitle,
   handleSubmit,
   handleCreate,
-  handleEdit,
+  handleEdit
 } = useInitForm({
   form: {
-    username: "",
-    password: "",
-    role_id: null,
-    status: 1,
-    avatar: ""
+    title: null, //商品名称
+    category_id: null, //商品分类
+    cover: null, //商品封面
+    desc: null, //商品描述
+    unit: "件", //商品单位
+    stock: 100, //总库存
+    min_stock: 10, //库存预警
+    status: 1, //是否上架 0仓库1上架
+    stock_display: 1, //库存显示 0隐藏1显示
+    min_price: 0, //最低销售价
+    min_oprice: 0 //最低原价
   },
   getData,
   update: updateGoods,
@@ -204,10 +286,39 @@ const tabbars = [{
   name: "回收站"
 }]
 
+// 商品分类
+const category_list = ref([])
+getCategoryList().then(res => category_list.value = res)
 
+// 设置轮播图
+const bannersRef = ref(null)
+const handleSetGoodsBanners = (row) => bannersRef.value.open(row)
 
+// 设置商品详情
+const contentRef = ref(null)
+const handleSetGoodsContent = (row) => contentRef.value.open(row)
+
+// 设置商品规格
+const skusRef = ref(null)
+const handleSetGoodsSkus = (row) => skusRef.value.open(row)
+
+const handleRestoreGoods = () => useMultiAction(restoreGoods, "恢复")
+
+const handleDestroyGoods = () => useMultiAction(destroyGoods, "彻底删除")
+
+function useMultiAction(func, msg) {
+  loading.value = true
+  func(multiSelectionIds.value)
+    .then(res => {
+      toast(msg + "成功")
+      // 清空选中
+      if (multipleTableRef.value) {
+        multipleTableRef.value.clearSelection()
+      }
+      getData()
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
 </script>
-
-<style scoped>
-
-</style>

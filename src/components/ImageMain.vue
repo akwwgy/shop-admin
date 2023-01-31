@@ -6,14 +6,10 @@
         <el-col :span="6" :offset="0" v-for="(item, index) in list" :key="index">
           <el-card shadow="hover" class="relative mb-3" :body-style="{ 'padding': 0 }"
             :class="{ 'border-blue-500': item.checked }">
-            <!-- :preview-src-list="[item.url]"点击预览效果 -->
             <el-image :src="item.url" fit="cover" class="h-[150px]" style="width: 100%;" :preview-src-list="[item.url]"
               :initial-index="0"></el-image>
             <div class="image-title">{{ item.name }}</div>
             <div class="flex items-center justify-center p-2">
-              <!-- 添加复选框 -->
-              <el-checkbox v-model="item.checked" @change="handleChooseChange(item)" />
-
 
               <el-checkbox v-if="openChoose" v-model="item.checked" @change="handleChooseChange(item)" />
 
@@ -33,7 +29,7 @@
 
     </div>
     <div class="bottom">
-      <el-pagination background layout="prev, pager,next" :total="total" :current-page="currentPage" :page-size="limit"
+      <el-pagination background layout="prev,pager, next" :total="total" :current-page="currentPage" :page-size="limit"
         @current-change="getData" />
     </div>
   </el-main>
@@ -41,8 +37,8 @@
   <el-drawer v-model="drawer" title="上传图片">
     <UploadFile :data="{ image_class_id }" @success="handleUploadSuccess" />
   </el-drawer>
-</template>
 
+</template>
 <script setup>
 import { ref, computed } from "vue"
 import {
@@ -54,58 +50,63 @@ import {
   showPrompt,
   toast
 } from "@/composables/util.js"
-import UploadFile from '@/components/UploadFile.vue'
+import UploadFile from "./UploadFile.vue";
 
-//上传图片
-const drawer = ref(false);
-const openUploadFile = () => drawer.value = true;
+// 上传图片
+const drawer = ref(false)
+const openUploadFile = () => drawer.value = true
 
-const currentPage = ref(1);
+// 分页
+const currentPage = ref(1)
 const total = ref(0)
 const limit = ref(10)
-//加载动画
-const loading = ref(false)
-const image_class_id = ref(0);
-
-
-//把网络请求数据保存起来，默认是空数组
 const list = ref([])
-//获取数据
+const loading = ref(false)
+const image_class_id = ref(0)
+
+// 获取数据
 function getData(p = null) {
   if (typeof p == "number") {
     currentPage.value = p
   }
-  loading.value = true;
-  getImageList(image_class_id.value, currentPage.value).then(res => {
-    total.value = res.totalCount
-    list.value = res.list.map(o => {
-      o.checked = false;
-      return o;
-    })
 
-  }).finally(() => {
-    loading.value = false
-  })
+  loading.value = true
+  getImageList(image_class_id.value, currentPage.value)
+    .then(res => {
+      total.value = res.totalCount
+      list.value = res.list.map(o => {
+        o.checked = false
+        return o
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
-//根据分类id重新加载图片列表
+
+// 根据分类ID重新加载图片列表
 const loadData = (id) => {
-  currentPage.value = 1;
-  image_class_id.value = id;
-  getData();
+  currentPage.value = 1
+  image_class_id.value = id
+  getData()
 }
 
-//重命名
+// 重命名
 const handleEdit = (item) => {
-  //对value进行解构
-  showPrompt("重命名", item.name).then(({ value }) => {
-    loading.value = true;
-    updateImage(item.id, value).then(res => {
-      toast("修改成功");
-      getData()
-    }).finally(() => {
-      loading.value = false;
+  showPrompt("重命名", item.name)
+    .then(({ value }) => {
+
+      loading.value = true
+      updateImage(item.id, value)
+        .then(res => {
+          toast("修改成功")
+          getData()
+        })
+        .finally(() => {
+          loading.value = false
+        })
+
     })
-  })
 }
 
 // 删除图片
@@ -120,37 +121,40 @@ const handleDelete = (id) => {
     })
 }
 
-defineProps({
+// 上传成功
+const handleUploadSuccess = () => getData(1)
+
+const props = defineProps({
   openChoose: {
     type: Boolean,
     default: false
+  },
+  limit: {
+    type: Number,
+    default: 1
   }
 })
 
-//上传成功
-const handleUploadSuccess = () => getData(1)
-
-//选中的图片
-const emits = defineEmits(["choose"])
+// 选中的图片
+const emit = defineEmits(["choose"])
 const checkedImage = computed(() => list.value.filter(o => o.checked))
-
 const handleChooseChange = (item) => {
-  console.log(checkedImage.value);
-  if (item.checked && checkedImage.value.length > 1) {
-    item.checked = false;
-    return toast("最多只能选择一张", "error")
+  if (item.checked && checkedImage.value.length > props.limit) {
+    item.checked = false
+    return toast(`最多只能选中${props.limit}张`, "error")
   }
-  emits("choose", checkedImage.value)
+  emit("choose", checkedImage.value)
 }
+
 
 defineExpose({
   loadData,
   openUploadFile
 })
 
-</script>
 
-<style scoped>
+</script>
+<style>
 .image-main {
   position: relative;
 }
