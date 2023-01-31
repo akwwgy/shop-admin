@@ -6,7 +6,7 @@
         <div class="custom-tree-node">
           <span>{{ data.name }}</span>
           <div class="ml-auto">
-            <el-button text type="primary" size="small" :loading="data.GoodsDrawerLoading"
+            <el-button text type="primary" size="small" :loading="data.goodsDrawerLoading"
               @click="openGoodsDrawer(data)">推荐商品</el-button>
             <el-switch :modelValue="data.status" :active-value="1" :inactive-value="0"
               @change="handleStatusChange($event, data)" />
@@ -66,7 +66,7 @@ const {
   getList: getCategoryList,
   onGetListSuccess: (res) => {
     tableData.value = res.map(o => {
-      o.GoodsDrawerLoading = false;
+      o.goodsDrawerLoading = false;
       return o;
     })
   },
