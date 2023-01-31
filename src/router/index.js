@@ -144,6 +144,14 @@ const asyncRoutes = [
       title: "会员等级"
     }
   },
+  {
+    path: "/user/list",
+    name: "/user/list",
+    component: () => import("@/pages/user/list.vue"),
+    meta: {
+      title: "用户管理"
+    }
+  },
 
 ]
 
