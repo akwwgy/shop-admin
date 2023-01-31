@@ -136,6 +136,14 @@ const asyncRoutes = [
       title: "优惠券管理"
     }
   },
+  {
+    path: "/level/list",
+    name: "/level/list",
+    component: () => import("@/pages/level/list.vue"),
+    meta: {
+      title: "会员等级"
+    }
+  },
 
 ]
 
