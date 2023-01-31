@@ -1,12 +1,13 @@
 <template>
-  <el-drawer v-model="showDrawer" :title="title" :size="size">
+  <el-drawer v-model="showDrawer" :title="title" :size="size" :close-on-click-modal="false"
+    :destroy-on-close="destroyOnClose">
     <div class="formDrawer">
       <div class="body">
         <slot></slot>
       </div>
       <div class="actions">
-        <el-button type="primary" @click="submit">{{ confirmtext }}</el-button>
-        <el-button type="primary" @click="close">取消</el-button>
+        <el-button type="primary" @click="submit" :loading="loading">{{ confirmtext }}</el-button>
+        <el-button type="default" @click="close">取消</el-button>
       </div>
     </div>
   </el-drawer>
@@ -81,6 +82,6 @@ defineExpose({
 
 .formDrawer .actions {
   height: 50px;
-  @apply mt-auto items-center;
+  @apply mt-auto flex items-center;
 }
 </style>

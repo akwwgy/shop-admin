@@ -1,5 +1,5 @@
 <template>
-  <FormDrawer ref="formDrawerRef">
+  <FormDrawer ref="formDrawerRef" @submit="handleConnect" confirmtext="关联">
     <el-table :data="tableData" border stripe style="width:100%">
       <el-table-column prop="goods_id" label="ID" width="60" />
       <el-table-column label="商品封面" width="180">
@@ -19,17 +19,19 @@
       </el-table-column>
     </el-table>
   </FormDrawer>
+  <ChooseGoods ref="ChooseGoodsRef" />
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { toast } from "@/composables/util"
 import FormDrawer from '@/components/FormDrawer.vue'
-
+import ChooseGoods from '@/components/ChooseGoods.vue'
 import {
   getCategoryGoods,
   deleteCategoryGoods
 } from "@/api/category.js"
+
 
 const formDrawerRef = ref(null);
 const category_id = ref(0);
@@ -63,6 +65,14 @@ const handleDelete = (row) => {
     getData()
   })
 }
+
+const ChooseGoodsRef = ref(null)
+
+const handleConnect = () => {
+  ChooseGoodsRef.value.open();
+}
+
+
 defineExpose({
   open
 })
