@@ -18,7 +18,37 @@
         </el-col>
       </el-row>
     </el-form>
-    <el-table :data="tableData" stripe style="width:100%" v-loading="loading">
+    <el-table default-expand-all :data="tableData" stripe style="width:100%" v-loading="loading">
+      <el-table-column type="expand">
+        <template #default="{ row }">
+          <div class="flex pl-18">
+            <el-avatar class="mr-3" icon="el-icon-user-solid" :size="50" shape="circle" :src="row.user.avatar"
+              fit="fill"></el-avatar>
+            <!-- flex-1沾满剩余空间 -->
+            <div class="flex-1">
+              <h6 class="flex items-center">
+                {{ row.user.nickname || row.user.username }}
+                <small class="text-gray-400 ml-2">{{ row.review_time }}</small>
+                <el-button size="small" class="ml-auto">回复</el-button>
+              </h6>
+              {{ row.review.data }}
+              <div class="py-2">
+                <el-image v-for="(item, index) in row.review.image" :src="item" :key="index" fit="fill" :lazy="true"
+                  style="width:100px;height:100px" class="rounded"></el-image>
+              </div>
+              <div class="mt-3 bg-gray-100 p-3 rounded" v-for="(item, index) in row.extra" :key="index">
+                <h6 class="flex font-bold">客服
+                  <el-button class="ml-auto" type="info" size="small">修改</el-button>
+                </h6>
+                <p>{{ item.data }}</p>
+              </div>
+            </div>
+
+          </div>
+        </template>
+      </el-table-column>
+
+
       <el-table-column lable="ID" width="70" align="center" prop="id" />
       <el-table-column label="商品" width="200">
         <template #default="{ row }">
@@ -49,25 +79,6 @@
           <el-switch :modelValue="row.status" :active-value="1" :inactive-value="0" :loading="row.statusLoading"
             :disabled="row.super == 1" @change="handleStatusChange($event, row)">
           </el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column prop="create_time" label="发布时间" width="380"></el-table-column>
-      <el-table-column label="操作" width="180" align="center">
-        <template #default="scope">
-          <small v-if="scope.row.super == 1" class="text-sm text-gary-500">暂无操作</small>
-          <div v-else>
-            <el-button type="primary" size="small" text @click="handleEdit(scope.row)">修改</el-button>
-            <span @click.stop="() => { }">
-              <el-popconfirm title="是否要删除该管理员？" confirmButtonText="确认" cancelButtonText="取消"
-                @confirm="handleDelete(scope.row.id)">
-                <template #reference>
-                  <el-button text class="px-1" type="primary" size="small">
-                    删除
-                  </el-button>
-                </template>
-              </el-popconfirm>
-            </span>
-          </div>
         </template>
       </el-table-column>
     </el-table>
