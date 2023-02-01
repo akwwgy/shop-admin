@@ -152,7 +152,14 @@ const asyncRoutes = [
       title: "用户管理"
     }
   },
-
+  {
+    path: "/comment/list",
+    name: "/comment/list",
+    component: () => import("@/pages/comment/list.vue"),
+    meta: {
+      title: "评论管理"
+    }
+  },
 ]
 
 export const router = createRouter({
