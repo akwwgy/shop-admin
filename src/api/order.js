@@ -19,3 +19,8 @@ export function exportOrder(query = {}) {
     responseType: "blob"
   })
 }
+
+//查看物流信息
+export function getShipInfo(id) {
+  return axios.get(`/admin/order/${id}/get_ship_info`)
+}

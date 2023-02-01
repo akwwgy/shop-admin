@@ -94,11 +94,12 @@
       </el-form>
     </el-card>
   </el-drawer>
+  <ShipInfoModal ref="ShipInfoModalRef" />
 </template>
 
 <script setup>
 import { ref, computed } from "vue"
-
+import ShipInfoModal from "./ShipInfoModal.vue"
 const props = defineProps({
   info: Object
 })
@@ -110,6 +111,14 @@ const open = () => {
   dialogVisible.value = true
   console.log(props.info)
 }
+
+const ShipInfoModalRef = ref(null)
+const loading = ref(false)
+const openShipInfoModal = (id) => {
+  loading.value = true
+  ShipInfoModalRef.value.open(id).finally(() => loading.value = false)
+}
+
 defineExpose({
   open
 })
