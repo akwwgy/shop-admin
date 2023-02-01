@@ -24,3 +24,8 @@ export function exportOrder(query = {}) {
 export function getShipInfo(id) {
   return axios.get(`/admin/order/${id}/get_ship_info`)
 }
+
+//退款
+export function refundOrder(id, data) {
+  return axios.post(`/admin/order/${id}/handle_refund`, data)
+}
