@@ -106,6 +106,7 @@
       </div>
     </el-card>
     <ExportExcel :tabs="tabbars" ref="ExportExcelRef" />
+    <InfoModal ref="InfoModalRef" :info="info" />
   </div>
 </template>
 <script setup>
@@ -114,6 +115,7 @@ import ListHeader from "@/components/ListHeader.vue";
 import Search from "@/components/Search.vue";
 import SearchItem from "@/components/SearchItem.vue";
 import ExportExcel from './ExportExcel.vue'
+import InfoModal from "./InfoModal.vue"
 import {
   getOrderList,
   deleteOrder,
@@ -189,5 +191,25 @@ const ExportExcelRef = ref(null)
 const handleExportExcel = () => {
   ExportExcelRef.value.open()
 }
+
+const InfoModalRef = ref(null)
+const info = ref(null)
+const openInfoModal = (row) => {
+  //为什么要这么做？？因为后续我们需要的是数组形式的数据
+  //order_items是数组形式，利用map拿到里面的每一个对象的value值追加到新数组里面
+  row.order_items = row.order_items.map(o => {
+    if (o.skus_type == 1 && o.goods_skus) {
+      let s = []
+      for (const k in o.goods_skus.skus) {
+        s.push(o.goods_skus.skus[k].value)
+      }
+      o.sku = s.join(",")
+    }
+    return o
+  })
+  info.value = row
+  InfoModalRef.value.open()
+}
+
 
 </script>
