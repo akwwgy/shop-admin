@@ -168,6 +168,14 @@ const asyncRoutes = [
       title: "订单管理"
     }
   },
+  {
+    path: "/setting/base",
+    name: "/setting/base",
+    component: () => import("@/pages/setting/base.vue"),
+    meta: {
+      title: "基础设置"
+    }
+  },
 ]
 
 export const router = createRouter({
