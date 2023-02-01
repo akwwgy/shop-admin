@@ -28,40 +28,57 @@
       <el-table ref="multipleTableRef" @selection-change="handleSelectionChange" :data="tableData" stripe
         style="width: 100%" v-loading="loading">
         <el-table-column type="selection" width="55" />
-        <el-table-column label="商品" width="300">
+        <el-table-column label="商品" width="310">
           <template #default="{ row }">
-            <div class="flex">
-              <el-image class="mr-3 rounded" :src="row.cover" fit="cover" :lazy="true" style="width:50px;height: 50px;">
-              </el-image>
+            <div class="flex tex-sm">
               <div class="flex-1">
-                <p>{{ row.title }}</p>
-                <div>
-                  <span class="text-rose-500">￥{{ row.min_price }}</span>
-                  <el-divider direction="vertical" />
-                  <span class="text-gray-500 text-xs">￥{{ row.min_oprice }}</span>
-                </div>
-                <p class="text-gray-400 text-xs mb-1">分类:{{ row.category ? row.category.name : "未分类" }}</p>
-                <p class="text-gray-400 text-xs">创建时间：{{ row.create_time }}</p>
+                <p>订单号</p>
+                <small>{{ row.no }}</small>
+              </div>
+              <div class="flex-1">
+                <p>下单时间</p>
+                <small>{{ row.create_time }}</small>
               </div>
             </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="实际销量" width="70" prop="sale_count" align="center" />
-        <el-table-column label="商品状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.status ? 'success' : 'danger'" size="small">{{ row.status ? '上架' : '仓库' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="审核状态" width="120" align="center" v-if="searchForm.tab != 'delete'">
-          <template #default="{ row }">
-            <div class="flex flex-col" v-if="row.ischeck == 0">
-              <el-button type="success" size="small" plain>审核通过</el-button>
-              <el-button class="mt-2 !ml-0" type="danger" size="small" plain>审核拒绝</el-button>
+            <div class="flex" v-for="(item, index) in row.order_items" :key="index">
+              <el-image :src="item.goods_item ? item.goods_item.cover : ''" fit="fill" :lazy="true"
+                style="width:30px;height:30px"></el-image>
+              <p class="text-blue-300">
+                {{ item.goods_item ? item.goods_item.title : '商品已被删除' }}
+              </p>
             </div>
-            <span v-else>{{ row.ischeck == 1 ? '通过' : '拒绝' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="总库存" width="90" prop="stock" align="center" />
+        <el-table-column label="实际付款" width="120" prop="total_price" align="center" />
+        <el-table-column label="买家" width="120" align="center">
+          <template #default="{ row }">
+            <p>{{ row.user.nickname || row.user.username }}</p>
+            <small>(用户ID：{{ row.user.id }})</small>
+          </template>
+        </el-table-column>
+        <el-table-column label="交易状态" width="170" align="center">
+          <template #default="{ row }">
+            <div>
+              付款状态：
+              <el-tag v-if="row.payment_method == 'wechat'" type="success" size="small">微信支付</el-tag>
+              <el-tag v-else-if="row.payment_method == 'alipay'" size="small">支付宝支付</el-tag>
+              <el-tag v-else type="info" size="small">未支付</el-tag>
+            </div>
+            <div>
+              发货状态：
+              <el-tag :type="row.ship_data ? 'success' : 'info'" size="small">{{
+                row.ship_data ? '已发货' : '未发货'
+              }}</el-tag>
+            </div>
+            <div>
+              收货状态：
+              <el-tag :type="row.ship_status == 'received' ? 'success' : 'info'" size="small">{{
+                row.ship_status ==
+                  'received' ? '已收货' : '未收货'
+              }}</el-tag>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button class="px-1" type="primary" size="small" text @click="handleEdit(scope.row)">商品详情</el-button>
