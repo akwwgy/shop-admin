@@ -176,6 +176,14 @@ const asyncRoutes = [
       title: "基础设置"
     }
   },
+  {
+    path: "/setting/buy",
+    name: "/setting/buy",
+    component: () => import("@/pages/setting/buy.vue"),
+    meta: {
+      title: "交易设置"
+    }
+  },
 ]
 
 export const router = createRouter({
