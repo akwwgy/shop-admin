@@ -80,8 +80,13 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center">
-          <template #default="scope">
-            <el-button class="px-1" type="primary" size="small" text @click="handleEdit(scope.row)">商品详情</el-button>
+          <template #default="{ row }">
+            <el-button class="px-1" type="primary" size="small" text @click="openInfoModal(row)">订单详情</el-button>
+            <el-button v-if="searchForm.tab === 'noship'" class="px-1" type="primary" size="small" text>订单发货</el-button>
+            <el-button v-if="searchForm.tab === 'refunding'" class="px-1" type="primary" size="small" text
+              @click="handleRefund(row.id, 1)">同意退款</el-button>
+            <el-button v-if="searchForm.tab === 'refunding'" class="px-1" type="primary" size="small" text
+              @click="handleRefund(row.id, 0)">拒绝退款</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -150,20 +155,26 @@ const tabbars = [{
   key: "all",
   name: "全部"
 }, {
-  key: "checking",
-  name: "审核中"
+  key: "nopay",
+  name: "待支付"
 }, {
-  key: "saling",
-  name: "出售中"
+  key: "noship",
+  name: "待发货"
 }, {
-  key: "off",
-  name: "已下架"
+  key: "shiped",
+  name: "待收货"
 }, {
-  key: "min_stock",
-  name: "库存预警"
+  key: "received",
+  name: "已收货"
 }, {
-  key: "delete",
-  name: "回收站"
+  key: "finish",
+  name: "已完成"
+}, {
+  key: "closed",
+  name: "已关闭"
+}, {
+  key: "refunding",
+  name: "退款中"
 }]
 
 </script>
