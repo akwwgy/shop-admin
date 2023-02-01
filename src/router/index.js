@@ -184,6 +184,14 @@ const asyncRoutes = [
       title: "交易设置"
     }
   },
+  {
+    path: "/setting/ship",
+    name: "/setting/ship",
+    component: () => import("@/pages/setting/ship.vue"),
+    meta: {
+      title: "物流设置"
+    }
+  },
 ]
 
 export const router = createRouter({
