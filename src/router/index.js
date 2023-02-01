@@ -160,6 +160,14 @@ const asyncRoutes = [
       title: "评论管理"
     }
   },
+  {
+    path: "/order/list",
+    name: "/order/list",
+    component: () => import("@/pages/order/list.vue"),
+    meta: {
+      title: "订单管理"
+    }
+  },
 ]
 
 export const router = createRouter({
