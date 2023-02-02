@@ -200,6 +200,14 @@ const asyncRoutes = [
       title: "分销员管理"
     }
   },
+  {
+    path: "/distribution/setting",
+    name: "/distribution/setting",
+    component: () => import("@/pages/distribution/setting.vue"),
+    meta: {
+      title: "分销设置"
+    }
+  },
 ]
 
 export const router = createRouter({

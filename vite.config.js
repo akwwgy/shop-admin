@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://ceshi13.dishait.cn/',
+        target: 'http://shopadmin.dishawang.com/api/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
