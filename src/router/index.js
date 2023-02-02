@@ -192,6 +192,14 @@ const asyncRoutes = [
       title: "物流设置"
     }
   },
+  {
+    path: "/distribution/index",
+    name: "/distribution/index",
+    component: () => import("@/pages/distribution/index.vue"),
+    meta: {
+      title: "分销员管理"
+    }
+  },
 ]
 
 export const router = createRouter({
